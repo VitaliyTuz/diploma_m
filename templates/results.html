@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результати AHP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='ahp_scripts.js') }}"></script>
+</head>
+<body class="bg-light">
+    <script>console.log("111")</script>
+    <div class="container py-5">
+        <h1 class="text-center text-primary mb-4">Результати методу AHP</h1>
+
+        <!-- Таблиця з вагами критеріїв -->
+        <h2 class="text-secondary mb-3">Ваги критеріїв</h2>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Критерій</th>
+                    <th>Вага</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for criterion, weight in zip(results['criteria'], results['criteria_weights']) %}
+                <tr>
+                    <td>{{ criterion }}</td>
+                    <td>{{ weight | round(3) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Таблиця з вагами альтернатив -->
+        <h2 class="text-secondary mb-3">Оцінки альтернатив:</h2>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Альтернатива</th>
+                    <th>Оцінка</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for option, score in zip(results['alternatives'], results['alternative_scores']) %}
+                <tr>
+                    <td>{{ option }}</td>
+                    <td>{{ score | round(3) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Найкраща альтернатива -->
+        <h2 class="text-secondary mb-3">Найкраща альтернатива</h2>
+        <p class="lead">
+            Найкраща альтернатива: <strong>{{ results['best_alternative'] }}</strong>
+        </p>
+
+        <!-- Графік критеріїв -->
+        <div class="my-4">
+            <h2 class="text-secondary mb-3">Розподіл ваг критеріїв</h2>
+            <canvas class="container my-3" style="max-width: 900px; max-height: 400px;" id="criteriaChart"></canvas>
+            
+            <script>
+                const criteriaLabels = {{ results['criteria']|tojson }};
+                const criteriaWeights = {{ results['criteria_weights']|tojson }};
+                console.log(criteriaLabels, criteriaWeights);
+                drawCriteriaChart(criteriaLabels, criteriaWeights);
+            </script>
+        
+        </div>
+
+        <div class="my-3">
+            <h2 class="text-secondary mb-3">Альтернативи</h2>
+            <canvas class="container" style="max-width: 900px; max-height: 400px;" id="alternativesChart" ></canvas>
+
+            <script>        
+                const alternatives = {{ results['alternatives'] | tojson }};
+                const scores = {{ results['alternative_scores'] | tojson }};
+        
+                drawAlternativesChart(alternatives, scores);
+            </script>
+        </div>
+    </div>
+
+    <div class="text-center my-4">
+        <a href="/" class="btn btn-secondary ">
+            На головну
+        </a>        
+        <button onclick="generatePDF(results1)" class="btn btn-primary">Завантажити PDF</button>
+    </div>
+    <br>
+
+    <script>
+        const results1 = {{ results | tojson }};
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+cbYYVz5SW77jLCoK0AP8x4uWAs6u" crossorigin="anonymous"></script>
+</body>
+</html>
